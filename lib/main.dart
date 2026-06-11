@@ -12,213 +12,126 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Eksplorasi Widget Flutter',
-      theme: ThemeData(colorSchemeSeed: Colors.green),
-      home: const WidgetExplorationPage(),
+      title: 'MovieNest',
+      theme: ThemeData(
+        brightness: Brightness.dark,
+        colorSchemeSeed: Colors.deepPurple,
+        scaffoldBackgroundColor: const Color(0xFF0F0F13),
+        useMaterial3: true,
+      ),
+      home: const WelcomeScreen(),
     );
   }
 }
 
-class WidgetExplorationPage extends StatelessWidget {
-  const WidgetExplorationPage({super.key});
+
+
+class WelcomeScreen extends StatelessWidget {
+  const WelcomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Eksplorasi Widget Flutter')),
-      body: SingleChildScrollView(
-        // ini penting agar semua du dalam widget ini bisa di scroll
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            // ==========================
-            // 1. PROFILE CARD
-            // ==========================
-            Card(
-              elevation: 3,
-              child: Padding(
-                padding: const EdgeInsets.all(30),
-                child: Column(
-                  children: [
-                    const Text(
-                      'Profile Card',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    const CircleAvatar(
-                      radius: 40,
-                      child: Icon(Icons.person, size: 40),
-                    ),
-                    const SizedBox(height: 10),
-                    const Text('Your name', style: TextStyle(fontSize: 20)),
-                    const Text('Student at University'),
-                    const SizedBox(height: 10),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                const MovieList(),
-                          ),
-                        );
-                      },
-                      child: const Text('Follow'),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            // ==========================
-            // 2. DASHBOARD MENU
-            // ==========================
-            Card(
-              elevation: 3,
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    const Text(
-                      'Dashboard Menu',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 15),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        _menuItem(Icons.home, 'Home'),
-                        _menuItem(Icons.favorite, 'Favorite'),
-                        _menuItem(Icons.settings, 'Settings'),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            // ==========================
-            // 3. INFORMATION BANNER
-            // ==========================
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.green.shade100,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Row(
-                children: [
-                  Icon(Icons.info),
-                  SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      'Selamat datang di aplikasi eksplorasi widget Flutter.',
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            // ==========================
-            // 4. ARTICLE LIST
-            // ==========================
-            Card(
-              elevation: 3,
-              child: Column(
-                children: const [
-                  Padding(
-                    padding: EdgeInsets.all(12),
-                    child: Text(
-                      'Daftar Artikel',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  ListTile(
-                    leading: Icon(Icons.book),
-                    title: Text('Belajar Flutter Dasar'),
-                  ),
-                  ListTile(
-                    leading: Icon(Icons.code),
-                    title: Text('Pengenalan Dart'),
-                  ),
-                  ListTile(
-                    leading: Icon(Icons.phone_android),
-                    title: Text('Membuat Aplikasi Mobile'),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            // ==========================
-            // 5. SIMPLE GALLERY
-            // ==========================
-            Card(
-              elevation: 3,
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    const Text(
-                      'Galeri Sederhana',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 15),
-                    GridView.count(
-                      crossAxisCount: 2,
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      children: [
-                        _galleryItem(Colors.blue),
-                        _galleryItem(Colors.red),
-                        _galleryItem(Colors.green),
-                        _galleryItem(Colors.orange),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF1A0040), Color(0xFF0F0F13), Color(0xFF0F0F13)],
+          ),
         ),
-      ),
-    );
-  }
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Spacer(flex: 2),
 
-  static Widget _menuItem(IconData icon, String title) {
-    return Column(
-      children: [Icon(icon, size: 35), const SizedBox(height: 5), Text(title)],
-    );
-  }
+                // Logo / Icon
+                Container(
+                  width: 72,
+                  height: 72,
+                  decoration: BoxDecoration(
+                    color: Colors.deepPurple,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Icon(Icons.movie_filter, size: 38, color: Colors.white),
+                ),
 
-  static Widget _galleryItem(Color color) {
-    return Container(
-      margin: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: const Center(
-        child: Icon(Icons.image, size: 50, color: Colors.white),
+                const SizedBox(height: 32),
+
+                // Headline
+                const Text(
+                  'Your movies,\nall in one place.',
+                  style: TextStyle(
+                    fontSize: 36,
+                    fontWeight: FontWeight.w800,
+                    height: 1.2,
+                    letterSpacing: -1,
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                // Subtext
+                const Text(
+                  'Discover, track, and explore films you love.',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.white54,
+                    height: 1.5,
+                  ),
+                ),
+
+                const Spacer(flex: 2),
+
+                // CTA Button
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    onPressed: () {
+                      // TODO: Navigate to movie list page
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const MovieList()),
+                      );
+                    },
+                    style: FilledButton.styleFrom(
+                      backgroundColor: Colors.deepPurple,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    child: const Text(
+                      'Get Started',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                // Secondary link
+                Center(
+                  child: TextButton(
+                    onPressed: () {
+                      // TODO: Navigate to login
+                    },
+                    child: const Text(
+                      'Already have an account? Sign in',
+                      style: TextStyle(color: Colors.white38, fontSize: 14),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
