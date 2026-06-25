@@ -1,26 +1,33 @@
 import 'package:flutter/material.dart';
-import 'movie_list.dart' show favoriteMovies;
+import '../bloc/movie_bloc.dart';
 
 class MovieDetail extends StatefulWidget {
   final Map<String, String> movie;
-  const MovieDetail({super.key, required this.movie});
+  final MovieBloc movieBloc;
+
+  const MovieDetail({
+    super.key,
+    required this.movie,
+    required this.movieBloc,
+  });
 
   @override
   State<MovieDetail> createState() => _MovieDetailState();
 }
 
 class _MovieDetailState extends State<MovieDetail> {
-  bool get _isFav => favoriteMovies.contains(widget.movie['title']);
+  bool get _isFav =>
+    widget.movieBloc.isFavorite(widget.movie);
 
   void _toggleFavorite() {
-    setState(() {
-      if (_isFav) {
-        favoriteMovies.remove(widget.movie['title']);
-      } else {
-        favoriteMovies.add(widget.movie['title']!);
-      }
-    });
+  if (_isFav) {
+    widget.movieBloc.removeFavorite(widget.movie);
+  } else {
+    widget.movieBloc.addFavorite(widget.movie);
   }
+
+  setState(() {});
+}
 
   @override
   Widget build(BuildContext context) {
