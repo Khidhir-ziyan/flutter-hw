@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/movie_bloc.dart';
+import '../bloc/movie_event.dart';
+import '../bloc/movie_state.dart';
 import 'movie_detail.dart';
 
 class FavoritePage extends StatelessWidget {
-  final MovieBloc movieBloc;
-
-  const FavoritePage({
-    super.key,
-    required this.movieBloc,
-  });
+  const FavoritePage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,29 +19,21 @@ class FavoritePage extends StatelessWidget {
           style: TextStyle(fontWeight: FontWeight.w700),
         ),
       ),
-      body: StreamBuilder<List<Map<String, String>>>(
-        stream: movieBloc.favoriteStream,
-        initialData: movieBloc.favorites,
-        builder: (context, snapshot) {
-          final favorites = snapshot.data ?? [];
+      body: BlocBuilder<MovieBloc, MovieState>(
+        builder: (context, state) {
+          final favorites =
+          state is MovieLoaded ? state.favorites : const [];
 
           if (favorites.isEmpty) {
             return const Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.favorite_border,
-                    size: 70,
-                    color: Colors.white24,
-                  ),
+                  Icon(Icons.favorite_border, size: 70, color: Colors.white24),
                   SizedBox(height: 16),
                   Text(
                     'No favorite movies yet',
-                    style: TextStyle(
-                      color: Colors.white54,
-                      fontSize: 16,
-                    ),
+                    style: TextStyle(color: Colors.white54, fontSize: 16),
                   ),
                 ],
               ),
@@ -71,44 +61,34 @@ class FavoritePage extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => MovieDetail(
-                          movie: movie,
-                          movieBloc: movieBloc,
-                        ),
+                        builder: (_) => MovieDetail(movie: movie),
                       ),
                     );
                   },
-                  leading: Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: Colors.deepPurple.shade800,
-                      borderRadius: BorderRadius.circular(10),
+                  leading: movie.posterUrl.isNotEmpty
+                      ? ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Image.network(
+                      movie.posterUrl,
+                      width: 48,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) =>
+                      const Icon(Icons.movie),
                     ),
-                    child: const Icon(
-                      Icons.movie,
-                      color: Colors.white70,
-                    ),
-                  ),
+                  )
+                      : const Icon(Icons.movie),
                   title: Text(
-                    movie['title']!,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                    ),
+                    movie.title,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                   subtitle: Text(
-                    "${movie['release']} • ${movie['rating']}",
-                    style: const TextStyle(
-                      color: Colors.white54,
-                    ),
+                    "${movie.releaseDate} • ${movie.voteAverage.toStringAsFixed(1)}",
+                    style: const TextStyle(color: Colors.white54),
                   ),
                   trailing: IconButton(
-                    icon: const Icon(
-                      Icons.favorite,
-                      color: Colors.pinkAccent,
-                    ),
+                    icon: const Icon(Icons.favorite, color: Colors.pinkAccent),
                     onPressed: () {
-                      movieBloc.removeFavorite(movie);
+                      context.read<MovieBloc>().add(ToggleFavorite(movie));
                     },
                   ),
                 ),

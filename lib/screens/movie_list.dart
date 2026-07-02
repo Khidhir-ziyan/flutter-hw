@@ -1,48 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/movie_bloc.dart';
+import '../bloc/movie_event.dart';
+import '../bloc/movie_state.dart';
+import '../models/movie.dart';
 import 'movie_detail.dart';
 import 'favorite_page.dart';
 
 class MovieListPage extends StatefulWidget {
-  final MovieBloc movieBloc;
-
-  const MovieListPage({
-    super.key,
-    required this.movieBloc,
-  });
+  const MovieListPage({super.key});
 
   @override
   State<MovieListPage> createState() => _MovieListPageState();
 }
 
 class _MovieListPageState extends State<MovieListPage> {
-  // Contoh data movie (nanti bisa diganti dengan data dari API atau BLoC)
-  final List<Map<String, String>> movies = [
-    {
-      'title': 'Inception',
-      'release': '2010',
-      'genre': 'Sci-Fi, Action',
-      'rating': '8.8',
-      'director': 'Christopher Nolan',
-      'synopsis': 'A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a CEO.',
-    },
-    {
-      'title': 'The Dark Knight',
-      'release': '2008',
-      'genre': 'Action, Crime',
-      'rating': '9.0',
-      'director': 'Christopher Nolan',
-      'synopsis': 'When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.',
-    },
-    {
-      'title': 'Interstellar',
-      'release': '2014',
-      'genre': 'Sci-Fi, Adventure',
-      'rating': '8.6',
-      'director': 'Christopher Nolan',
-      'synopsis': "A team of explorers travel through a wormhole in space in an attempt to ensure humanity's survival.",
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    context.read<MovieBloc>().add(FetchMovies());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,91 +34,120 @@ class _MovieListPageState extends State<MovieListPage> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (_) => FavoritePage(
-                    movieBloc: widget.movieBloc,
-                  ),
-                ),
+                MaterialPageRoute(builder: (_) => const FavoritePage()),
               );
             },
           ),
         ],
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: movies.length,
-        itemBuilder: (context, index) {
-          final movie = movies[index];
-          final isFavorite = widget.movieBloc.isFavorite(movie);
+      body: BlocBuilder<MovieBloc, MovieState>(
+        builder: (context, state) {
+          if (state is MovieLoading || state is MovieInitial) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-          return Card(
-            color: const Color(0xFF1E1E24),
-            margin: const EdgeInsets.only(bottom: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: ListTile(
-              contentPadding: const EdgeInsets.all(16),
-              title: Text(
-                movie['title']!,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+          if (state is MovieError) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const SizedBox(height: 4),
+                  const Icon(Icons.wifi_off, size: 60, color: Colors.white24),
+                  const SizedBox(height: 16),
                   Text(
-                    '${movie['release']} • ${movie['genre']}',
+                    state.message,
+                    textAlign: TextAlign.center,
                     style: const TextStyle(color: Colors.white54),
                   ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.star,
-                        color: Colors.amber,
-                        size: 16,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        movie['rating']!,
-                        style: const TextStyle(color: Colors.amber),
-                      ),
-                    ],
+                  const SizedBox(height: 16),
+                  FilledButton(
+                    onPressed: () =>
+                        context.read<MovieBloc>().add(FetchMovies()),
+                    child: const Text('Coba Lagi'),
                   ),
                 ],
               ),
-              trailing: IconButton(
-                icon: Icon(
-                  isFavorite ? Icons.favorite : Icons.favorite_border,
-                  color: isFavorite ? Colors.red : Colors.white54,
+            );
+          }
+
+          final loadedState = state as MovieLoaded;
+          final movies = loadedState.movies;
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: movies.length,
+            itemBuilder: (context, index) {
+              final movie = movies[index];
+              final isFavorite = loadedState.isFavorite(movie);
+
+              return Card(
+                color: const Color(0xFF1E1E24),
+                margin: const EdgeInsets.only(bottom: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                onPressed: () {
-                  setState(() {
-                    if (isFavorite) {
-                      widget.movieBloc.removeFavorite(movie);
-                    } else {
-                      widget.movieBloc.addFavorite(movie);
-                    }
-                  });
-                },
-              ),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => MovieDetail(
-                      movie: movie,
-                      movieBloc: widget.movieBloc,
+                child: ListTile(
+                  contentPadding: const EdgeInsets.all(16),
+                  leading: movie.posterUrl.isNotEmpty
+                      ? ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(
+                      movie.posterUrl,
+                      width: 50,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) =>
+                      const Icon(Icons.movie),
+                    ),
+                  )
+                      : const Icon(Icons.movie),
+                  title: Text(
+                    movie.title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
                     ),
                   ),
-                );
-              },
-            ),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 4),
+                      Text(
+                        movie.releaseDate,
+                        style: const TextStyle(color: Colors.white54),
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          const Icon(Icons.star, color: Colors.amber, size: 16),
+                          const SizedBox(width: 4),
+                          Text(
+                            movie.voteAverage.toStringAsFixed(1),
+                            style: const TextStyle(color: Colors.amber),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  trailing: IconButton(
+                    icon: Icon(
+                      isFavorite ? Icons.favorite : Icons.favorite_border,
+                      color: isFavorite ? Colors.red : Colors.white54,
+                    ),
+                    onPressed: () {
+                      context.read<MovieBloc>().add(ToggleFavorite(movie));
+                    },
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => MovieDetail(movie: movie),
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
           );
         },
       ),
